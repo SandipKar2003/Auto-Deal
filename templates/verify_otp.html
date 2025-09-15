@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verify OTP</title>
+  <link rel="stylesheet" href="/static/style_su.css">
+  <style>
+    .container { display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .card { background: rgba(0,0,0,0.85); padding: 40px; border-radius: 20px; width: 450px; text-align: center; }
+    .card input { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 12px; border: none; outline: none; background: #1e1e1e; color: #fff; font-size: 0.95em; }
+    .card button { width: 100%; padding: 15px 0; background: #00ff75; border: none; border-radius: 12px; font-size: 1em; color: #000; font-weight: bold; cursor: pointer; }
+    .card button:hover { background: #00cc5c; }
+    .message { color: #ff4d4d; font-weight: bold; margin-bottom: 15px; }
+    .resend-btn { margin-top: 15px; background: #252525; color: #fff; border-radius: 12px; padding: 12px; cursor: pointer; width: 100%; }
+    .resend-btn:hover { background: #555; }
+    .timer { margin-bottom: 10px; color: #00ff75; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h2 style="color:#00ff75">Verify OTP</h2>
+
+      {% if error %}
+        <p class="message">{{ error }}</p>
+      {% endif %}
+
+      {% if message %}
+        <p style="color:#00ff75;font-weight:bold;">{{ message }}</p>
+      {% endif %}
+
+      <p class="timer" id="timer">Time left: 60s</p>
+
+      <form id="verifyForm" method="POST" action="/verify-otp">
+        <input type="text" name="otp" placeholder="Enter OTP" required>
+        <button type="submit">Verify OTP</button>
+      </form>
+
+      <form id="resendForm" method="GET" action="/resend-otp" style="display: none;">
+        <button type="submit" class="resend-btn">Resend OTP</button>
+      </form>
+
+      <a href="/Sign_up" style="display:block;margin-top:10px;color:#00ff75;">Back to Sign Up</a>
+    </div>
+  </div>
+
+  <script>
+    let timeLeft = 60;
+    const timerElem = document.getElementById("timer");
+    const resendForm = document.getElementById("resendForm");
+    const verifyForm = document.getElementById("verifyForm");
+
+    const countdown = setInterval(() => {
+      timeLeft--;
+      timerElem.textContent = "Time left: " + timeLeft + "s";
+      if (timeLeft <= 0) {
+        clearInterval(countdown);
+        timerElem.textContent = "OTP expired. Please resend OTP.";
+        resendForm.style.display = "block"; // Show resend button
+        verifyForm.style.display = "none"; // Hide OTP input form
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

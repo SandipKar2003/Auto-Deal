@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Car Sell Website - Sign Up</title>
+  <link rel="icon" href="/static/skd logo.jpg">
+  <link rel="stylesheet" href="/static/sign_up.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <form class="form" method="POST" action="/signup">
+        <h2 class="heading">Create Your Account</h2>
+
+        {% if error %}
+          <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <div class="field"><input type="text" name="name" placeholder="Full Name" required></div>
+        <div class="field"><input type="email" name="email" placeholder="Email Address" required></div>
+        <div class="field"><input type="text" name="address" placeholder="Home Address" required></div>
+        <div class="field"><input type="text" name="location" placeholder="Current Location" required></div>
+
+        <!-- Password Field with Stylish Placeholder -->
+        <div class="field">
+          <input type="password" name="password" placeholder="New Password (8+ chars, 1 Upper, 1@,#,$, 2+ digits)" required>
+        </div>
+        <div class="field">
+          <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+        </div>
+
+        <div class="btn"><button type="submit">Sign Up</button></div>
+        <a href="/Sign_in" class="sign-in">Already have an account? Sign in</a>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

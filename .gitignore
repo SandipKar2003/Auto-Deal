@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+*.env.*
+
+# Virtual environment
+venv/
+fvnv/
+env/
+ENV/
+
+# Editor / IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+logs/
+*.pot
+*.pyc
+
+# Database files
+*.sqlite3
+*.db
+
+# CSV files (ignore all CSVs except tracked ones)
+*.csv
+
+# Static / uploads (if any)
+static/uploads/
+media/
+
+# Mac / Linux system files
+.DS_Store
+Thumbs.db
+
+# Ignore pycache in templates
+templates/__pycache__/
+
+# Ignore FastAPI-Mail cache / temp
+fastapi_mail_cache/

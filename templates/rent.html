@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car sell website</title>
+    <link rel="icon" href="../static/skd logo.jpg">
+    <!-- link to css -->
+    <link rel="stylesheet" href="../static/rent.css">
+    <!-- link boxicons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+</head>
+
+<body>
+    <!-- header -->
+    <header>
+        <a href="#" class="logo"><img src="../static/skd logo.jpg" alt="sandip kar"></a>
+        <div class="bx bx-menu" id="menu-icon"></div>
+        <ul class="navbar">
+            <li><a href="/#home">Home</a></li>
+            <li><a href="/#ride">Ride</a></li>
+            <li><a href="/#services">Services</a></li>
+            <li><a href="/#about">About</a></li>
+            <li><a href="/#reviews">Reviews</a></li>
+        </ul>
+    </header>
+    <div class="body_bap">
+        <!-- for image and rent -->
+        <div class="rent">
+            <img src="{{ product.img }}" alt="Product Image">
+            <div class="button">
+                <button class="r">Rent Now</button>
+                <button class="b">Buy Now</button>
+            </div>
+        </div>
+        <div class="des">
+            <!-- <h2><p>🚗 2018 Honda Civic – Excellent Condition</p></h2>
+            <p class="ovv"><strong>Overview:</strong> This 2018 Honda Civic combines sleek design with reliable performance. Ideal for daily commuting or weekend drives, it offers comfort and efficiency.</p>
+            <ul>
+                <li><h5>Mileage:</h5> 45,000 km</li>
+                <li><h5>Fuel Type:</h5> Petrol</li>
+                <li><h5>Transmission:</h5> Automatic</li>
+                <li><h5>Color:</h5> Metallic Silver</li>
+                <li><h5>Condition:</h5> Well-maintained, no accidents</li>
+                <li><h5>Service History:</h5> Full service records available</li>
+            </ul> -->
+
+
+            <h2>🚗 {{ product.name }} – Excellent Condition</h2>
+<p class="ovv"><strong>Overview:</strong> {{ product.overview }}</p>
+<ul>
+    <li><h5>Mileage:</h5> {{ product.details["Mileage"] }}</li>
+    <li><h5>Fuel Type:</h5> {{ product.details["Fuel Type"] }}</li>
+    <li><h5>Transmission:</h5> {{ product.details["Transmission"] }}</li>
+    <li><h5>Color:</h5> {{ product.details["Color"] }}</li>
+    <li><h5>Condition:</h5> {{ product.details["Condition"] }}</li>
+    <li><h5>Service History:</h5> {{ product.details["Service History"] }}</li>
+</ul>
+
+
+        </div>
+    </div>
+
+</body>
+
+</html>
