@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Buy - {{ product.name }}</title>
+  <link rel="icon" href="/static/skd logo.jpg" />
+  <!-- keep your site main css if you like, plus the buy/rent css -->
+  <link rel="stylesheet" href="/static/rent.css">
+  <link rel="stylesheet" href="/static/buy_rent.css">
+</head>
+<body>
+  <header>
+    <a href="#" class="logo"><img src="/static/skd logo.jpg" alt="logo"></a>
+    <div class="bx bx-menu" id="menu-icon"></div>
+    <ul class="navbar">
+      <li><a href="/#home">Home</a></li>
+      <li><a href="/#ride">Ride</a></li>
+      <li><a href="/#services">Services</a></li>
+      <li><a href="/#about">About</a></li>
+      <li><a href="/#reviews">Reviews</a></li>
+    </ul>
+  </header>
+
+  <main class="page-wrap">
+    <div class="panel animate-panel">
+      <h1 class="center">You want to <span class="accent">buy</span> this <strong>{{ product.name }}</strong>?</h1>
+
+      <div class="card-row">
+        <div class="img-col">
+          <img src="{{ product.img }}" alt="{{ product.name }}" class="product-img">
+        </div>
+        <div class="info-col">
+          <p class="overview"><strong>Overview:</strong> {{ product.overview }}</p>
+
+          <div class="price-block">
+            <div class="label">Price (Buy):</div>
+            <div class="price-value">{{ buy_price }}</div>
+          </div>
+
+          <ul class="details-list">
+            <li><strong>Year:</strong> {{ product.year }}</li>
+            <li><strong>Mileage:</strong> {{ product.details["Mileage"] }}</li>
+            <li><strong>Fuel Type:</strong> {{ product.details["Fuel Type"] }}</li>
+            <li><strong>Transmission:</strong> {{ product.details["Transmission"] }}</li>
+            <li><strong>Color:</strong> {{ product.details["Color"] }}</li>
+          </ul>
+
+          <form action="/confirm_buy" method="post" class="confirm-form">
+            <input type="hidden" name="car_id" value="{{ product.id }}">
+            <label>Name</label>
+            <input type="text" name="customer_name" required>
+            <label>Email</label>
+            <input type="email" name="customer_email" required>
+            <label>Phone</label>
+            <input type="tel" name="customer_phone" required>
+
+            <button type="submit" class="confirm-btn">Confirm Buy</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

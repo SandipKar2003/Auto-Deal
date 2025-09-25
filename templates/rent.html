@@ -30,8 +30,9 @@
         <div class="rent">
             <img src="{{ product.img }}" alt="Product Image">
             <div class="button">
-                <button class="r">Rent Now</button>
-                <button class="b">Buy Now</button>
+                <a href="/rent/{{ product.id }}" class="r">Rent Now</a>
+                <a href="/buy/{{ product.id }}" class="b">Buy Now</a>
+
             </div>
         </div>
         <div class="des">

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rent Confirmed</title>
+  <link rel="icon" href="/static/skd logo.jpg" />
+  <link rel="stylesheet" href="/static/buy_rent2.css">
+</head>
+<body>
+  <main class="success-wrap">
+    <div class="success-card animate-panel">
+      <div class="icon">🚗</div>
+      <h1>Congratulations — Rent Confirmed!</h1>
+      <p>You have successfully RENTED <strong style="color:#ff5733;">{{ product.name }}</strong>.</p>
+
+      <div class="summary">
+        <p><strong>Rent:</strong> ${{ rent_price }}</p>
+        <p><strong>Renter:</strong> {{ customer_name }}</p>
+        <p><strong>Email:</strong> {{ customer_email }}</p>
+        <p><strong>Phone:</strong> {{ customer_phone }}</p>
+        <p><strong>Pick up Date:</strong> {{ pick_up_date }}</p>
+        <p><strong>Duration:</strong> {{ duration }} month(s)</p>
+      </div>
+
+      <a class="back-btn" href="/home">Back to Cars</a>
+    </div>
+  </main>
+</body>
+</html>

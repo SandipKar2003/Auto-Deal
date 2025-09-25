@@ -746,3 +746,159 @@ def start_streamlit():
     # Launch Streamlit
     subprocess.Popen(["streamlit", "run", "main.py"])
     return {"message": "Streamlit launched"}
+
+
+from product_data import products
+
+# --- add to app.py (below your existing routes) ---
+from fastapi import Form
+
+# show buy confirmation page (shows buy price = left side of '|')
+@app.get("/buy/{product_id}", response_class=HTMLResponse)
+async def buy_page(request: Request, product_id: int):
+    if not get_current_user(request):
+        return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
+
+    product = next((p for p in products if p["id"] == product_id), None)
+    if not product:
+        return HTMLResponse(content="Product not found", status_code=404)
+
+    # parse buy price (left of '|')
+    raw_price = product.get("price", "")
+    buy_price = raw_price.split("|")[0].strip() if "|" in raw_price else raw_price.strip()
+
+    return templates.TemplateResponse("confirm_buy.html", {
+        "request": request,
+        "product": product,
+        "buy_price": buy_price
+    })
+
+# handle buy confirmation POST
+# --- handle buy confirmation POST ---
+@app.post("/confirm_buy", response_class=HTMLResponse)
+async def confirm_buy(
+    request: Request,
+    car_id: int = Form(...),
+    customer_name: str = Form(...),
+    customer_email: str = Form(...),
+    customer_phone: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    # Find the selected product
+    product = next((p for p in products if p["id"] == car_id), None)
+    if not product:
+        return HTMLResponse(content="Product not found", status_code=404)
+
+    # Extract and clean price
+    raw_price = product.get("price", "")
+    buy_price = raw_price.split("|")[0].strip() if "|" in raw_price else raw_price.strip()
+    clean_price = float(buy_price.replace("$", "").replace(",", "").strip())
+
+    # Save to database
+    buy_record = models.Buy(
+        customer_name=customer_name,
+        email=customer_email,
+        phone=customer_phone,
+        car_id=car_id,
+        car_name=product["name"],
+        price=clean_price
+    )
+    db.add(buy_record)
+    db.commit()
+    db.refresh(buy_record)
+
+    # Pass everything needed to template
+    return templates.TemplateResponse("success_buy.html", {
+        "request": request,
+        "product_name": product["name"],
+        "buy_price": buy_price,
+        "customer_name": customer_name,
+        "customer_email": customer_email,
+        "customer_phone": customer_phone,
+        "product":product
+    })
+
+
+
+# show rent confirmation page (shows rent price = right side of '|')
+@app.get("/rent/{product_id}", response_class=HTMLResponse)
+async def rent_page(request: Request, product_id: int):
+    if not get_current_user(request):
+        return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
+
+    product = next((p for p in products if p["id"] == product_id), None)
+    if not product:
+        return HTMLResponse(content="Product not found", status_code=404)
+
+    raw_price = product.get("price", "")
+    # rent price usually after '|'
+    rent_price = raw_price.split("|")[1].strip() if "|" in raw_price and len(raw_price.split("|")) > 1 else raw_price.strip()
+
+    return templates.TemplateResponse("rent_confirm.html", {
+        "request": request,
+        "product": product,
+        "rent_price": rent_price
+    })
+
+
+# handle rent confirmation POST
+@app.post("/confirm_rent", response_class=HTMLResponse)
+async def confirm_rent(
+    request: Request,
+    car_id: int = Form(...),
+    customer_name: str = Form(...),
+    email: str = Form(...),
+    phone: str = Form(...),
+    duration: str = Form(...),
+    pick_up_date: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    product = next((p for p in products if p["id"] == car_id), None)
+    if not product:
+        return HTMLResponse(content="Product not found", status_code=404)
+
+    # extract raw price
+    raw_price = product.get("price", "")
+    rent_price = raw_price.split("|")[1].strip() if "|" in raw_price and len(raw_price.split("|")) > 1 else raw_price.strip()
+
+    # ✅ clean to float before inserting into DB
+    clean_rent_price = float(
+        rent_price.replace("$", "").replace("/month", "").replace(",", "").strip()
+    )
+    duration_int = int(duration)
+    total_rent=clean_rent_price*duration_int
+    pick_up_date_obj = datetime.strptime(pick_up_date, "%d-%m-%Y").date()
+
+
+    rent_record = models.Rent(
+        customer_name=customer_name,
+        email=email,
+        phone=phone,
+        duration=duration,
+        car_id=car_id,
+        car_name=product["name"],
+        rent_price_per_month=clean_rent_price,   # float value
+        total_rent = float(clean_rent_price) * float(duration),
+        pick_up_date=pick_up_date_obj
+
+    )
+
+    db.add(rent_record)
+    db.commit()
+    db.refresh(rent_record)
+
+    return templates.TemplateResponse("success_rent.html", {
+    "request": request,
+    "rent_price": total_rent,           # pass total rent here
+    "customer_name": customer_name,
+    "customer_email": email,
+    "customer_phone": phone,
+    "product": product,
+    "duration": duration,
+    "pick_up_date": pick_up_date_obj.strftime("%d-%m-%Y")  
+})
+
+    
+# --- end additions ---
+
+# # --- end additions ---

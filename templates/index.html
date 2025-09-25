@@ -108,7 +108,7 @@
             <h1><span>Looking</span> to <br> rent a car</h1>
             <p>Hii Guys!!!!<br>I Am Coming To poduce car as rent <br> take your <span>FEVOURITE</span> car from me </p>
 
-             
+
 
 
             <div class="appstores">
@@ -166,30 +166,30 @@
     </section>
 
     <!-- service -->
-   <section class="services" id="services">
-    <div class="heading">
-        <span>Best Service</span>
-        <h1>Explore Our Deals <br> From Top Rated Dealers</h1>
-    </div>
+    <section class="services" id="services">
+        <div class="heading">
+            <span>Best Service</span>
+            <h1>Explore Our Deals <br> From Top Rated Dealers</h1>
+        </div>
 
-    <div class="services-container">
-        <!-- old service cards kept here in comments -->
+        <div class="services-container">
+            <!-- old service cards kept here in comments -->
 
-        {% for product in products %}
-        <div class="box">
-            <div class="box-img">
-                <img src="{{ product.img }}" alt="Product Image">
-            </div>
-            <p>{{ product.year }}</p>
-            <h3>{{ product.short_desc }}</h3>
-            <h2>{{ product.price }} <span>/month</span></h2>
+            {% for product in products %}
+            <div class="box">
+                <div class="box-img">
+                    <img src="{{ product.img }}" alt="Product Image">
+                </div>
+                <p>{{ product.year }}</p>
+                <h3>{{ product.short_desc }}</h3>
+                <h2>{{ product.price }} <span>/month</span></h2>
 
-            {% if request.session.get("user") %}
+                {% if request.session.get("user") %}
                 <div class="pbtn">
                     <button onclick="runStreamlit()" class="btnp">Predict Your Car Price</button>
                 </div>
-                <a href="/product/{{ product.id }}" class="btn">Rent Now</a>
-            {% else %}
+                <a href="/product/{{ product.id }}" class="btn">Rent Or Buy Now</a>
+                {% else %}
                 <div style="background:#ffe6e6; border:1px solid #ff4d4d; 
                             color:#cc0000; padding:10px 15px; 
                             border-radius:8px; margin-top:12px; 
@@ -199,11 +199,11 @@
                         Login
                     </a> to predict price or rent
                 </div>
-            {% endif %}
+                {% endif %}
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
-</section>
+    </section>
 
 
     <!-- about -->
@@ -218,11 +218,19 @@
             </div>
             <div class="about-text">
                 <span>About Us</span>
-                <p>In our car rental app, we strive to provide a seamless and convenient experience for all our users.
-                    From booking a vehicle to returning it, we prioritize customer satisfaction above all else. With a
-                    diverse fleet of well-maintained cars, we offer options to suit every need and budget. Our
-                    user-friendly interface makes it easy to browse, select, and reserve the perfect car for your
-                    journey.</p>
+                <p>Welcome to our Car Rental & Price Prediction platform! We make renting, buying, and selling cars
+                    simple, fast, and reliable. Whether you want to rent a car for a few days, purchase a second-hand
+                    vehicle, or check the market price of your car, our platform has you covered.
+
+                    Our fleet includes a wide range of well-maintained vehicles to suit every preference and budget.
+                    With our user-friendly interface, you can easily browse cars, reserve your favorite vehicle, and
+                    have it delivered to your doorstep.
+
+                    Additionally, our AI-powered price prediction system helps you make informed decisions when renting
+                    or buying cars, ensuring you always get the best deal.
+
+                    Experience convenience, transparency, and comfort—all in one place. Start your journey with us
+                    today!.</p>
                 <p>So don't miss the chance come our site and select your fevourite car fill the all process and take
                     the car at your home</p>
                 <a href="#" class="btn">Learn More</a>
@@ -249,9 +257,9 @@
                     <i class="bx bxs-star"></i>
                     <i class="bx bxs-star-half"></i>
                 </div>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus praesentium placeat quae! Unde, in
-                    inventore! Excepturi dignissimos, sit temporibus laboriosam maiores quia numquam itaque, in ratione
-                    vitae nobis, odio repudiandae.</p>
+                <p>I really enjoyed the UI and animations. The predictive system for car prices is amazing — it made
+                    buying my old car feel much safer. The rent confirmation page is visually appealing and shows all
+                    details neatly.</p>
             </div>
 
             <div class="box">
@@ -266,7 +274,8 @@
                     <i class="bx bxs-star"></i>
                     <i class="bx bxs-star-half"></i>
                 </div>
-                <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eaque ex cupiditate expedita?</p>
+                <p>The car rental process is smooth, and the price prediction tool is a great addition. I could see the
+                    estimated rent and resale value before making a decision. Very helpful for planning my budget!</p>
             </div>
 
             <div class="box">
@@ -281,7 +290,9 @@
                     <i class="bx bxs-star"></i>
                     <i class="bx bxs-star-half"></i>
                 </div>
-                <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eaque ex cupiditate expedita?</p>
+                <p>"I really enjoyed the UI and animations. The predictive system for car prices is amazing — it made
+                    buying my old car feel much safer. The rent confirmation page is visually appealing and shows all
+                    details neatly."</p>
             </div>
         </div>
     </section>
