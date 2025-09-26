@@ -1,448 +1,3 @@
-# from fastapi import FastAPI, Request, Form, Depends
-# from fastapi.templating import Jinja2Templates
-# from fastapi.responses import HTMLResponse, RedirectResponse
-# from fastapi.staticfiles import StaticFiles
-# from sqlalchemy.orm import Session
-# from passlib.hash import bcrypt
-# from starlette.status import HTTP_303_SEE_OTHER
-# from starlette.middleware.sessions import SessionMiddleware
-# import subprocess
-# import psutil
-
-# # Local imports
-# import models
-# from database import SessionLocal, engine
-# from product_data import products
-
-# # -----------------------------------
-# # DATABASE SETUP
-# # -----------------------------------
-# models.Base.metadata.create_all(bind=engine)
-
-# # FastAPI app
-# app = FastAPI()
-# app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
-
-# # Static + Templates
-# app.mount("/static", StaticFiles(directory="static"), name="static")
-# templates = Jinja2Templates(directory="templates")
-
-
-# # -----------------------------------
-# # DATABASE DEPENDENCY
-# # -----------------------------------
-# def get_db():
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
-
-
-# # -----------------------------------
-# # AUTH HELPER
-# # -----------------------------------
-# def get_current_user(request: Request):
-#     return request.session.get("user")
-
-
-# # -----------------------------------
-# # SIGN UP
-# # -----------------------------------
-# @app.get("/Sign_up", response_class=HTMLResponse)
-# def sign_up_page(request: Request):
-#     return templates.TemplateResponse("index_su.html", {"request": request})
-
-
-# @app.post("/signup", response_class=HTMLResponse)
-# def sign_up(
-#     request: Request,
-#     name: str = Form(...),
-#     email: str = Form(...),
-#     address: str = Form(...),
-#     location: str = Form(...),
-#     password: str = Form(...),
-#     confirm_password: str = Form(...),
-#     db: Session = Depends(get_db),
-# ):
-#     if password != confirm_password:
-#         return templates.TemplateResponse(
-#             "index_su.html", {"request": request, "error": "Passwords do not match"}
-#         )
-
-#     existing_user = db.query(models.User).filter_by(email=email).first()
-#     if existing_user:
-#         return templates.TemplateResponse(
-#             "index_su.html", {"request": request, "error": "Email already registered"}
-#         )
-
-#     hashed_pw = bcrypt.hash(password)
-#     new_user = models.User(
-#         name=name,
-#         email=email,
-#         address=address,
-#         location=location,
-#         password_hash=hashed_pw,
-#     )
-#     db.add(new_user)
-#     db.commit()
-
-#     return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
-
-
-# # -----------------------------------
-# # SIGN IN / LOGOUT
-# # -----------------------------------
-# @app.get("/Sign_in", response_class=HTMLResponse)
-# def sign_in_page(request: Request):
-#     return templates.TemplateResponse("index_si.html", {"request": request})
-
-
-# @app.post("/signin", response_class=HTMLResponse)
-# def sign_in(
-#     request: Request,
-#     email: str = Form(...),
-#     password: str = Form(...),
-#     db: Session = Depends(get_db),
-# ):
-#     user = db.query(models.User).filter_by(email=email).first()
-
-#     if not user or not bcrypt.verify(password, user.password_hash):
-#         return templates.TemplateResponse(
-#             "index_si.html", {"request": request, "error": "Invalid email or password"}
-#         )
-
-#     # Save login session
-#     request.session["user"] = user.email
-
-#     return RedirectResponse(url="/home", status_code=HTTP_303_SEE_OTHER)
-
-
-# @app.get("/logout")
-# def logout(request: Request):
-#     request.session.clear()
-#     return RedirectResponse(url="/", status_code=HTTP_303_SEE_OTHER)
-
-
-
-# # -----------------------------------
-# # HOME & PRODUCT ROUTES
-# # -----------------------------------
-# @app.get("/", response_class=HTMLResponse)
-# async def car_front(request: Request):
-#     return templates.TemplateResponse(
-#         "index.html", {"request": request, "products": products}
-#     )
-
-
-# @app.get("/home", response_class=HTMLResponse)
-# async def home(request: Request):
-#     return templates.TemplateResponse(
-#         "index.html", {"request": request, "products": products}
-#     )
-
-
-# @app.get("/product/{product_id}", response_class=HTMLResponse)
-# async def product_detail(request: Request, product_id: int):
-#     if not get_current_user(request):
-#         return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
-
-#     product = next((p for p in products if p["id"] == product_id), None)
-#     if not product:
-#         return HTMLResponse(content="Product not found", status_code=404)
-#     return templates.TemplateResponse("rent.html", {"request": request, "product": product})
-
-
-# # -----------------------------------
-# # PROTECTED ROUTES (REQUIRE LOGIN)
-# # -----------------------------------
-# @app.get("/ride", response_class=HTMLResponse)
-# async def ride(request: Request):
-#     if not get_current_user(request):
-#         return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
-#     return templates.TemplateResponse("index.html", {"request": request})
-
-
-# @app.get("/services", response_class=HTMLResponse)
-# async def services(request: Request):
-#     if not get_current_user(request):
-#         return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
-#     return templates.TemplateResponse("index.html", {"request": request})
-
-
-# @app.get("/reviews", response_class=HTMLResponse)
-# async def reviews(request: Request):
-#     if not get_current_user(request):
-#         return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
-#     return templates.TemplateResponse("index.html", {"request": request})
-
-
-# @app.get("/about", response_class=HTMLResponse)
-# async def about(request: Request):
-#     if not get_current_user(request):
-#         return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
-#     return templates.TemplateResponse("index.html", {"request": request})
-
-
-# # -----------------------------------
-# # STREAMLIT INTEGRATION (PROTECTED)
-# # -----------------------------------
-# @app.get("/predict")
-# def start_streamlit(request: Request):
-#     if not get_current_user(request):
-#         return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
-
-#     for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-#         cmdline = ' '.join(proc.info.get('cmdline') or [])
-#         if "streamlit" in cmdline and "main.py" in cmdline:
-#             return {"message": "Streamlit already running"}
-
-#     subprocess.Popen(["streamlit", "run", "main.py"])
-#     return {"message": "Streamlit launched"}
-
-
-# ****************************************************************************************************************************************8
-
-# from fastapi import FastAPI, Request, Form, Depends
-# from fastapi.templating import Jinja2Templates
-# from fastapi.responses import HTMLResponse, RedirectResponse
-# from fastapi.staticfiles import StaticFiles
-# from sqlalchemy.orm import Session
-# from passlib.hash import bcrypt
-# from starlette.status import HTTP_303_SEE_OTHER
-# from starlette.middleware.sessions import SessionMiddleware
-# import subprocess
-# import psutil
-# import os
-# from dotenv import load_dotenv
-# import smtplib
-# from email.mime.text import MIMEText
-
-# # Local imports
-# import models
-# from database import SessionLocal, engine
-# from product_data import products
-
-# # Load environment variables
-# load_dotenv()
-# EMAIL = os.getenv("EMAIL")
-# APP_PASSWORD = os.getenv("APP_PASSWORD")
-
-# # -----------------------------------
-# # DATABASE SETUP
-# # -----------------------------------
-# models.Base.metadata.create_all(bind=engine)
-
-# # FastAPI app
-# app = FastAPI()
-# app.add_middleware(SessionMiddleware, secret_key="your-secret-key")
-
-# # Static + Templates
-# app.mount("/static", StaticFiles(directory="static"), name="static")
-# templates = Jinja2Templates(directory="templates")
-
-
-# # -----------------------------------
-# # DATABASE DEPENDENCY
-# # -----------------------------------
-# def get_db():
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
-
-
-# # -----------------------------------
-# # AUTH HELPER
-# # -----------------------------------
-# def get_current_user(request: Request):
-#     return request.session.get("user")
-
-
-# # -----------------------------------
-# # SEND WELCOME EMAIL
-# # -----------------------------------
-# def send_welcome_email(to_email, name):
-#     subject = "Welcome to Car Rental App"
-#     body = f"Hi {name},\n\nThank you for registering at our Car Rental App!"
-    
-#     msg = MIMEText(body)
-#     msg['Subject'] = subject
-#     msg['From'] = EMAIL
-#     msg['To'] = to_email
-
-#     try:
-#         server = smtplib.SMTP("smtp.gmail.com", 587)
-#         server.starttls()
-#         server.login(EMAIL, APP_PASSWORD)
-#         server.sendmail(EMAIL, to_email, msg.as_string())
-#         server.quit()
-#         print("Email sent successfully!")
-#     except Exception as e:
-#         print("Error sending email:", e)
-
-
-# # -----------------------------------
-# # SIGN UP
-# # -----------------------------------
-# @app.get("/Sign_up", response_class=HTMLResponse)
-# def sign_up_page(request: Request):
-#     return templates.TemplateResponse("index_su.html", {"request": request})
-
-
-# @app.post("/signup", response_class=HTMLResponse)
-# def sign_up(
-#     request: Request,
-#     name: str = Form(...),
-#     email: str = Form(...),
-#     address: str = Form(...),
-#     location: str = Form(...),
-#     password: str = Form(...),
-#     confirm_password: str = Form(...),
-#     db: Session = Depends(get_db),
-# ):
-#     if password != confirm_password:
-#         return templates.TemplateResponse(
-#             "index_su.html", {"request": request, "error": "Passwords do not match"}
-#         )
-
-#     existing_user = db.query(models.User).filter_by(email=email).first()
-#     if existing_user:
-#         return templates.TemplateResponse(
-#             "index_su.html", {"request": request, "error": "Email already registered"}
-#         )
-
-#     hashed_pw = bcrypt.hash(password)
-#     new_user = models.User(
-#         name=name,
-#         email=email,
-#         address=address,
-#         location=location,
-#         password_hash=hashed_pw,
-#     )
-#     db.add(new_user)
-#     db.commit()
-
-#     # Send welcome email
-#     send_welcome_email(email, name)
-
-#     return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
-
-
-# # -----------------------------------
-# # SIGN IN / LOGOUT
-# # -----------------------------------
-# @app.get("/Sign_in", response_class=HTMLResponse)
-# def sign_in_page(request: Request):
-#     return templates.TemplateResponse("index_si.html", {"request": request})
-
-
-# @app.post("/signin", response_class=HTMLResponse)
-# def sign_in(
-#     request: Request,
-#     email: str = Form(...),
-#     password: str = Form(...),
-#     db: Session = Depends(get_db),
-# ):
-#     user = db.query(models.User).filter_by(email=email).first()
-
-#     if not user or not bcrypt.verify(password, user.password_hash):
-#         return templates.TemplateResponse(
-#             "index_si.html", {"request": request, "error": "Invalid email or password"}
-#         )
-
-#     # Save login session
-#     request.session["user"] = user.email
-
-#     return RedirectResponse(url="/home", status_code=HTTP_303_SEE_OTHER)
-
-
-# @app.get("/logout")
-# def logout(request: Request):
-#     request.session.clear()
-#     return RedirectResponse(url="/", status_code=HTTP_303_SEE_OTHER)
-
-
-# # -----------------------------------
-# # HOME & PRODUCT ROUTES
-# # -----------------------------------
-# @app.get("/", response_class=HTMLResponse)
-# async def car_front(request: Request):
-#     return templates.TemplateResponse(
-#         "index.html", {"request": request, "products": products}
-#     )
-
-
-# @app.get("/home", response_class=HTMLResponse)
-# async def home(request: Request):
-#     return templates.TemplateResponse(
-#         "index.html", {"request": request, "products": products}
-#     )
-
-
-# @app.get("/product/{product_id}", response_class=HTMLResponse)
-# async def product_detail(request: Request, product_id: int):
-#     if not get_current_user(request):
-#         return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
-
-#     product = next((p for p in products if p["id"] == product_id), None)
-#     if not product:
-#         return HTMLResponse(content="Product not found", status_code=404)
-#     return templates.TemplateResponse("rent.html", {"request": request, "product": product})
-
-
-# # -----------------------------------
-# # PROTECTED ROUTES (REQUIRE LOGIN)
-# # -----------------------------------
-# @app.get("/ride", response_class=HTMLResponse)
-# async def ride(request: Request):
-#     if not get_current_user(request):
-#         return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
-#     return templates.TemplateResponse("index.html", {"request": request})
-
-
-# @app.get("/services", response_class=HTMLResponse)
-# async def services(request: Request):
-#     if not get_current_user(request):
-#         return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
-#     return templates.TemplateResponse("index.html", {"request": request})
-
-
-# @app.get("/reviews", response_class=HTMLResponse)
-# async def reviews(request: Request):
-#     if not get_current_user(request):
-#         return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
-#     return templates.TemplateResponse("index.html", {"request": request})
-
-
-# @app.get("/about", response_class=HTMLResponse)
-# async def about(request: Request):
-#     if not get_current_user(request):
-#         return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
-#     return templates.TemplateResponse("index.html", {"request": request})
-
-
-# # -----------------------------------
-# # STREAMLIT INTEGRATION (PROTECTED)
-# # -----------------------------------
-# @app.get("/predict")
-# def start_streamlit(request: Request):
-#     if not get_current_user(request):
-#         return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
-
-#     for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-#         cmdline = ' '.join(proc.info.get('cmdline') or [])
-#         if "streamlit" in cmdline and "main.py" in cmdline:
-#             return {"message": "Streamlit already running"}
-
-#     subprocess.Popen(["streamlit", "run", "main.py"])
-#     return {"message": "Streamlit launched"}
-
-
-
-# # *******************************************************************************************************************************************************
-
 from fastapi import FastAPI, Request, Form, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -465,22 +20,20 @@ import models
 from database import SessionLocal, engine
 from product_data import products
 
-# ----------------------------
 # LOAD ENV VARIABLES
-# ----------------------------
+
 load_dotenv()
 EMAIL = os.getenv("EMAIL")
 APP_PASSWORD = os.getenv("APP_PASSWORD")
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-# ----------------------------
+
 # DATABASE SETUP
-# ----------------------------
+
 models.Base.metadata.create_all(bind=engine)
 
-# ----------------------------
 # FASTAPI APP
-# ----------------------------
+
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
@@ -488,9 +41,8 @@ app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# ----------------------------
 # DATABASE DEPENDENCY
-# ----------------------------
+
 def get_db():
     db = SessionLocal()
     try:
@@ -498,9 +50,9 @@ def get_db():
     finally:
         db.close()
 
-# ----------------------------
+
 # MAIL CONFIGURATION
-# ----------------------------
+
 conf = ConnectionConfig(
     MAIL_USERNAME=EMAIL,
     MAIL_PASSWORD=APP_PASSWORD,
@@ -514,15 +66,14 @@ conf = ConnectionConfig(
 )
 fm = FastMail(conf)
 
-# ----------------------------
+
 # AUTH HELPER
-# ----------------------------
+
 def get_current_user(request: Request):
     return request.session.get("user")
 
-# ----------------------------
 # PASSWORD VALIDATION
-# ----------------------------
+
 def validate_password(password: str) -> str:
     if len(password) < 8:
         return "Password must be at least 8 characters long."
@@ -534,9 +85,8 @@ def validate_password(password: str) -> str:
         return "Password must contain at least 2 digits."
     return ""
 
-# ----------------------------
 # SIGN UP
-# ----------------------------
+
 @app.get("/Sign_up", response_class=HTMLResponse)
 def sign_up_page(request: Request):
     return templates.TemplateResponse("index_su.html", {"request": request})
@@ -600,9 +150,8 @@ async def sign_up(
     
     return templates.TemplateResponse("verify_otp.html", {"request": request, "email": email})
 
-# ----------------------------
 # VERIFY OTP
-# ----------------------------
+
 @app.post("/verify-otp", response_class=HTMLResponse)
 async def verify_otp(
     request: Request,
@@ -665,9 +214,8 @@ async def verify_otp(
 
     return RedirectResponse(url="/Sign_in", status_code=HTTP_303_SEE_OTHER)
 
-# ----------------------------
 # RESEND OTP
-# ----------------------------
+
 @app.get("/resend-otp", response_class=HTMLResponse)
 async def resend_otp(request: Request):
     if "signup_data" not in request.session:
@@ -694,9 +242,8 @@ async def resend_otp(request: Request):
         "verify_otp.html", {"request": request, "email": data["email"], "message": "New OTP sent!"}
     )
 
-# ----------------------------
 # SIGN IN / LOGOUT
-# ----------------------------
+
 @app.get("/Sign_in", response_class=HTMLResponse)
 def sign_in_page(request: Request):
     return templates.TemplateResponse("index_si.html", {"request": request})
@@ -714,9 +261,9 @@ def logout(request: Request):
     request.session.clear()
     return RedirectResponse(url="/", status_code=HTTP_303_SEE_OTHER)
 
-# ----------------------------
+
 # HOME & PRODUCT ROUTES
-# ----------------------------
+
 @app.get("/", response_class=HTMLResponse)
 async def car_front(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "products": products})
@@ -774,7 +321,7 @@ async def buy_page(request: Request, product_id: int):
     })
 
 # handle buy confirmation POST
-# --- handle buy confirmation POST ---
+
 @app.post("/confirm_buy", response_class=HTMLResponse)
 async def confirm_buy(
     request: Request,
@@ -807,7 +354,7 @@ async def confirm_buy(
     db.commit()
     db.refresh(buy_record)
 
-    # Pass everything needed to template
+    
     return templates.TemplateResponse("success_buy.html", {
         "request": request,
         "product_name": product["name"],
@@ -861,7 +408,7 @@ async def confirm_rent(
     raw_price = product.get("price", "")
     rent_price = raw_price.split("|")[1].strip() if "|" in raw_price and len(raw_price.split("|")) > 1 else raw_price.strip()
 
-    # ✅ clean to float before inserting into DB
+    # clean to float before inserting into DB
     clean_rent_price = float(
         rent_price.replace("$", "").replace("/month", "").replace(",", "").strip()
     )
@@ -877,7 +424,7 @@ async def confirm_rent(
         duration=duration,
         car_id=car_id,
         car_name=product["name"],
-        rent_price_per_month=clean_rent_price,   # float value
+        rent_price_per_month=clean_rent_price,   
         total_rent = float(clean_rent_price) * float(duration),
         pick_up_date=pick_up_date_obj
 
@@ -889,7 +436,7 @@ async def confirm_rent(
 
     return templates.TemplateResponse("success_rent.html", {
     "request": request,
-    "rent_price": total_rent,           # pass total rent here
+    "rent_price": total_rent,          
     "customer_name": customer_name,
     "customer_email": email,
     "customer_phone": phone,
@@ -898,7 +445,4 @@ async def confirm_rent(
     "pick_up_date": pick_up_date_obj.strftime("%d-%m-%Y")  
 })
 
-    
-# --- end additions ---
 
-# # --- end additions ---
