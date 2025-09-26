@@ -4,7 +4,7 @@ jinja2==3.1.2
 sqlalchemy==2.0.22
 pydantic==2.11.0
 passlib[bcrypt]==1.7.4
-python-multipart==0.0.6
+python-multipart
 fastapi-mail==1.0.5
 email-validator==2.1.1
 psutil==5.9.5
